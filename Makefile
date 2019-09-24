@@ -1,2 +1,2 @@
-csubatch_sample: csubatch_sample.c
-	$(CC) csubatch_sample.c -o csubatch_sample -lpthread 
+csubatch: csubatch.c commandline_parser.c scheduler.c dispatcher.c jobQueue.c
+		gcc -o csubatch csubatch.c commandline_parser.c scheduler.c dispatcher.c jobQueue.c -lpthread
