@@ -1,7 +1,7 @@
 /*
  *
  * This sample source code demonstrates the development of
- * a batch-job scheduler using pthread.
+ * a batch-job_struct scheduler using pthread.
  *
  * Compilation Instruction:
  * gcc pthread_sample.c -o pthread_sample -lpthread
@@ -9,14 +9,14 @@
  *  Objecties:
  * 1. To compile and run a program powered by the pthread library
  * 2. To create two concurrent threads: a scheduling thread and a dispatching thread
- * 3. To execute jobs in the csubatch system by the dispatching thread
+ * 3. To execute job_structs in the csubatch system by the dispatching thread
  * 4. To synchronize the two concurrent threads using condition variables
  *
  * How to run csubatch_sample?
  * 1. You need to compile another sample code: process.c
  * 2. The "process" program (see process.c) takes two input arguments
  * from the commandline
- * 3. In csubatch: type ./process 5 10 to submit program "process" as a job.
+ * 3. In csubatch: type ./process 5 10 to submit program "process" as a job_struct.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,12 +36,12 @@ typedef unsigned int u_int;
 #define LOW_SERVICE_RATE   /* Long service time */
 
 /*
- * Static commands are submitted to the job queue.
- * When comment out the following macro, job are submitted by users.
+ * Static commands are submitted to the job_struct queue.
+ * When comment out the following macro, job_struct are submitted by users.
  */
 
 /*
- * When a job is submitted, the job must be compiled before it
+ * When a job_struct is submitted, the job_struct must be compiled before it
  * is running by the executor thread (see also executor()).
  */
 
@@ -53,7 +53,7 @@ int main() {
     char *message2 = "Executor Thread";
     int  iret1, iret2;
 
-	//initialize job queue
+	//initialize job_struct queue
 	initJobQueue();
     
 

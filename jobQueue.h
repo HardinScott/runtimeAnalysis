@@ -12,19 +12,20 @@ extern pthread_cond_t cmd_buf_not_empty; // Condition variable for buf_not_empty
 
 
 
-//definitions for job queue
+//definitions for job_struct queue
 #define CMD_BUF_SIZE 10 // The size of the command queue
-#define NUM_OF_CMD   5  // The number of submitted jobs   
+#define NUM_OF_CMD   5  // The number of submitted job_structs   
 #define MAX_CMD_LEN  512 // The longest commandline length
 
 
 //struct definitions
-struct JOB{
+typedef struct{
 	char* jobName;
 	int position;
 	int executionTime;
 	int priority;
-};
+	char* status;
+}job_struct;
 
 
 // Global shared variables 
@@ -32,11 +33,11 @@ extern u_int buf_head;
 extern u_int buf_tail;
 extern u_int count;
 
-extern struct JOB jobQueueBuffer[];
+extern job_struct jobQueueBuffer[];
 
 //functions
 void initJobQueue();
 
-struct JOB newJob(char* jobName, int position, int executionTime, int priority);
+job_struct newJob(char* jobName, int position, int executionTime, int priority, char* status);
 
 #endif

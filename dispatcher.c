@@ -1,5 +1,5 @@
 /*
- * This function simulates a server running jobs in a batch mode.
+ * This function simulates a server running job_structs in a batch mode.
  * Note: The input parameter (i.e., *ptr) is optional.
  * If you intend to create a thread from a function
  * with input parameters, please follow this example.
@@ -30,7 +30,7 @@ void *executor(void *ptr) {
 
         /* Run the command scheduled in the queue */
         count--;
-        printf("In executor: jobQueueBuffer[%d] = %s\n", buf_tail, jobQueueBuffer[buf_tail].jobName);
+        printf("In executor: job_structQueueBuffer[%d] = %s\n", buf_tail, jobQueueBuffer[buf_tail].jobName);
 
         /*
          * Note: system() function is a simple example.
@@ -38,7 +38,7 @@ void *executor(void *ptr) {
          */
         system(jobQueueBuffer[buf_tail].jobName);
         /* Free the dynamically allocated memory for the buffer */
-        //free(jobQueueBuffer[buf_tail]);
+        //free(job_structQueueBuffer[buf_tail]);
 
         /* Move buf_tail forward, this is a circular queue */
         buf_tail++;

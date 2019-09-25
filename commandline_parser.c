@@ -22,17 +22,17 @@
 
 
 /*
- * The run command - submit a job.
+ * The run command - submit a job_struct.
  */
 int cmd_run(int nargs, char **args) {
     if (nargs != 4){
-        printf("Usage: run <job> <time> <priority>\n");
+        printf("Usage: run <job_struct> <time> <priority>\n");
 		
         return 0;
     }
 
-    /* Use execv to run the submitted job in csubatch */
-    printf("use execv to run the job in csubatch.\n");
+    /* Use execv to run the submitted job_struct in csubatch */
+    printf("use execv to run the job_struct in csubatch.\n");
 	printf("%s %s %s\n", args[1], args[2], args[3]);
     return 0; /* if succeed */
 }
@@ -72,7 +72,7 @@ void showmenu(const char *name, const char *x[])
 }
 
 static const char *helpmenu[] = {
-        "[run] <job> <time> <priority>       ",
+        "[run] <job_struct> <time> <priority>       ",
         "[quit] Exit csubatch                 ",
         "[help] Print help menu              ",
         /* Please add more menu options below */

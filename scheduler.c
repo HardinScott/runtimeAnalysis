@@ -1,7 +1,7 @@
 
 /*
  * This function simulates a terminal where users may
- * submit jobs into a batch processing queue.
+ * submit job_structs into a batch processing queue.
  * Note: The input parameter (i.e., *ptr) is optional.
  * If you intend to create a thread from a function
  * with input parameters, please follow this example.
@@ -17,7 +17,7 @@
 
 void *commandline(void *ptr) {
     char *message;
-    struct JOB temp_cmd;
+    job_struct temp_cmd;
     u_int i;
     char num_str[8];
     size_t command_size;
@@ -39,14 +39,14 @@ void *commandline(void *ptr) {
         printf("Please submit a batch processing job:\n");
         pthread_mutex_unlock(&cmd_queue_lock);
 
-        printf("Please submit a batch processing job:\n");
+        printf("Please submit a batch processing job_struct:\n");
         printf(">");
-        temp_cmd = newJob("./process", 10, 10, 10);//create job
+        temp_cmd = newJob("./process", 10, 10, 10, "Pending");//create job_struct
         //getline(&temp_cmd, &command_size, stdin);
         pthread_mutex_lock(&cmd_queue_lock);
         jobQueueBuffer[buf_head]= temp_cmd;
 
-        printf("In commandline: jobQueueBuffer[%d] = %s\n", buf_head, jobQueueBuffer[buf_head].jobName);
+        printf("In commandline: job_structQueueBuffer[%d] = %s\n", buf_head, jobQueueBuffer[buf_head].jobName);
 
         count++;
 

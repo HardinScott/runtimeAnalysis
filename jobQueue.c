@@ -1,15 +1,16 @@
-/*Functions for Job Queue*/
+/*Functions for job_struct Queue*/
 #include "jobQueue.h"
 #include <pthread.h>
 #include <sys/types.h>
+#include <string.h>
 
 pthread_mutex_t cmd_queue_lock;  /* Lock for critical sections */
 pthread_cond_t cmd_buf_not_full; /* Condition variable for buf_not_full */
 pthread_cond_t cmd_buf_not_empty; /* Condition variable for buf_not_empty */
 
-
+/*Constant definitions*/
 #define CMD_BUF_SIZE 10 // The size of the command queue
-#define NUM_OF_CMD   5  // The number of submitted jobs   
+#define NUM_OF_CMD   5  // The number of submitted job_structs   
 #define MAX_CMD_LEN  512 // The longest commandline length
 
 
@@ -19,10 +20,12 @@ u_int buf_tail;
 u_int count;
 
 //struct varibles
-struct JOB;
+struct job_struct;
 
-//define job queue buffer
-struct JOB jobQueueBuffer[CMD_BUF_SIZE];
+
+
+//define job_struct queue buffer
+job_struct jobQueueBuffer[CMD_BUF_SIZE];
 
 
 void initJobQueue()
@@ -34,13 +37,14 @@ void initJobQueue()
 }
 
 
-struct JOB newJob(char* jobName, int position, int executionTime, int priority)
+job_struct newJob(char* jobName, int position, int executionTime, int priority, char* status)
 {	
-	struct JOB newJob;
+	job_struct newJob;
 	newJob.jobName = jobName;
 	newJob.position = position;
-	newJob.executionTime =executionTime;
+	newJob.executionTime = executionTime;
 	newJob.priority = priority;
+	newJob.status = status;
 	
 	return newJob;
 }
