@@ -10,7 +10,7 @@ pthread_cond_t cmd_buf_not_empty; /* Condition variable for buf_not_empty */
 
 /*Constant definitions*/
 #define CMD_BUF_SIZE 10 // The size of the command queue
-#define NUM_OF_CMD   5  // The number of submitted job_structs   
+#define NUM_OF_CMD   5  // The number of submitted jobs   
 #define MAX_CMD_LEN  512 // The longest commandline length
 
 
@@ -47,5 +47,10 @@ job_struct newJob(char* jobName, int position, int executionTime, int priority, 
 	newJob.status = status;
 	
 	return newJob;
+}
+
+void addJob(job_struct job)
+{
+	jobQueueBuffer[buf_head] = job;
 }
 

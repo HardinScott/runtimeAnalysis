@@ -38,6 +38,8 @@ extern job_struct jobQueueBuffer[];
 //functions
 void initJobQueue();
 
+void addJob(job_struct job);
+
 job_struct newJob(char* jobName, int position, int executionTime, int priority, char* status);
 
 #endif

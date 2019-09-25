@@ -41,11 +41,8 @@ void *commandline(void *ptr) {
 
         printf("Please submit a batch processing job_struct:\n");
         printf(">");
-        temp_cmd = newJob("./process", 10, 10, 10, "Pending");//create job_struct
-        //getline(&temp_cmd, &command_size, stdin);
         pthread_mutex_lock(&cmd_queue_lock);
-        jobQueueBuffer[buf_head]= temp_cmd;
-
+		addJob(newJob("./process", 10, 10, 10, "Pending"));
         printf("In commandline: job_structQueueBuffer[%d] = %s\n", buf_head, jobQueueBuffer[buf_head].jobName);
 
         count++;
