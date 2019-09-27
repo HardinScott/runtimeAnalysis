@@ -3,7 +3,7 @@
 
 #include <pthread.h>
 #include <sys/types.h>
-
+#include <time.h>
 
 //refacter so that scheduler does not need any of this!!!
 #define JOB_BUF_SIZE 10 // The size of the JOB queue
@@ -11,13 +11,13 @@
 #define MAX_CMD_LEN  512 // The longest commandline length
 
 
-//struct varibles
+//struct variables
 typedef struct{
 	char* job_name;
 	int arrival_position;
 	int execution_time;
 	int priority;
-	char* status;
+	char* status; //change status function needed in jobQueue.c
 }job_struct;
 
 
@@ -46,6 +46,10 @@ int getJobCount(); //returns job_count
 int isEmpty(); //if job queue is empty returns 1 else 0
 
 int isFull(); //if job queue is full returns 1 else 0
+
+job_struct getElementAtPos(int pos); //returns element at pos
+
+static void switchJobsInQueueWithoutLock(int posJobA, int posJobB); //swaps elements in job queue at position a and b
 
 /*head functions*/
 

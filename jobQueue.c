@@ -24,7 +24,9 @@ static void setTailPosWithoutLock(int tailPos); //sets buf_tail and ensure withi
 static void incrementTailWithoutLock(); //increments buf_tail by one when lock has been previously acquired
 static void decrementTailWithoutLock(); //decrements buf_tail by one when lock has been previously acquired
 static int getTailPosWithoutLock(); //returns buf_tail when lock has been previously acquired
-static job_struct getTailElementWithoutLock(); //returns element at buf_tail when lock has been acquired
+static job_struct getTailElementWithoutLock(); //returns element at buf_tail when lock has been previously acquired
+static job_struct getElementAtPosWithoutLock(int pos); //returns element at position when lock has been previously acquired
+static void switchJobsInQueueWithoutLock(int posJobA, int posJobB); //swaps elements in job queue at position a and b when lock has been previously acquired
 
 /*pthread mutex and condition variables*/
 pthread_mutex_t job_queue_lock;  /* Lock for critical sections */
@@ -148,7 +150,7 @@ void runJob()
 			pthread_mutex_unlock(&job_queue_lock);
 		}
 }
-/*
+/*Switches jobs at position A and position B*/
 void switchJobsInQueue(int posJobA, int posJobB)
 {
 	pthread_mutex_lock(&job_queue_lock);
@@ -158,9 +160,11 @@ void switchJobsInQueue(int posJobA, int posJobB)
 
 static void switchJobsInQueueWithoutLock(int posJobA, int posJobB)
 {
-	job_struct temp = 
+	job_struct temp = getElementAtPosWithoutLock(posJobA);
+	job_queue_buffer[posJobA] = getElementAtPosWithoutLock(posJobB);
+	job_queue_buffer[posJobB] = temp;
 }
-*/
+
 /*increments job_count*/
 void incrementJobCount()
 {
@@ -420,14 +424,15 @@ static void displayJob(job_struct element)
 		element.priority,
 		element.status);		
 }
-/*
-void getElementAtPos(int pos)
+/*gets element at position*/
+job_struct getElementAtPos(int pos)
 {
-	
+	pthread_mutex_lock(&job_queue_lock);
+	getElementAtPosWithoutLock(pos);
+	pthread_mutex_unlock(&job_queue_lock);
 }
 
-static void getElementAtPosWithoutLock(int pos)
+static job_struct getElementAtPosWithoutLock(int pos)
 {
-	
+	return job_queue_buffer[pos];
 }
-*/
