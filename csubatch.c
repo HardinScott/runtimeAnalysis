@@ -28,22 +28,14 @@
 #include "scheduler.h"
 #include "dispatcher.h"
 #include "commandline_parser.h"
-
+#include <stdatomic.h>
 
 typedef unsigned int u_int;
 
+atomic_int aflag = ATOMIC_FLAG_INIT; 
+
 //#define LOW_ARRIVAL_RATE /* Long arrivel-time interval */
 #define LOW_SERVICE_RATE   /* Long service time */
-
-/*
- * Static commands are submitted to the job_struct queue.
- * When comment out the following macro, job_struct are submitted by users.
- */
-
-/*
- * When a job_struct is submitted, the job_struct must be compiled before it
- * is running by the executor thread (see also executor()).
- */
 
 
 
@@ -55,16 +47,17 @@ int main() {
 
 	//initialize job_struct queue
 	initJobQueue();
+	initMutex();
+	atomic_flag_test_and_set(&aflag);
+	
     
 
     /* Create two independent threads:command and executors */
     iret1 = pthread_create(&command_thread, NULL, commandline, (void*) message1);
     iret2 = pthread_create(&executor_thread, NULL, executor, (void*) message2);
-
-    /* Initialize the lock the two condition variables */
-    pthread_mutex_init(&cmd_queue_lock, NULL);
-    pthread_cond_init(&cmd_buf_not_full, NULL);
-    pthread_cond_init(&cmd_buf_not_empty, NULL);
+	
+	//initalize mutex lock and conditions
+	
 
     /* Wait till threads are complete before main continues. Unless we  */
     /* wait we run the risk of executing an exit which will terminate   */

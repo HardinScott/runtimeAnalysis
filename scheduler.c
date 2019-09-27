@@ -14,47 +14,28 @@
 #include <unistd.h>
 #include "scheduler.h"
 #include "jobQueue.h"
+#include <stdatomic.h>
+
+
+extern atomic_flag aflag;
 
 void *commandline(void *ptr) {
     char *message;
-    job_struct temp_cmd;
     u_int i;
     char num_str[8];
     size_t command_size;
-
     message = (char *) ptr;
     printf("%s \n", message);
 
     /* Enter multiple commands in the queue to be scheduled */
     for (i = 0; i < NUM_OF_CMD; i++) {
-        /* lock the shared command queue */
-        pthread_mutex_lock(&cmd_queue_lock);
+		
+		addJob(newJob("process", 10, 10, 10, "Pending"));
+        printf("In jobQueue: QueueBuffer[%d]", getJobCount());        
 
-        printf("In commandline: count = %d\n", count);
-        while (count == CMD_BUF_SIZE) {
-            pthread_cond_wait(&cmd_buf_not_full, &cmd_queue_lock);
-        }
-	pthread_mutex_unlock(&cmd_queue_lock);
-
-        printf("Please submit a batch processing job:\n");
-        pthread_mutex_unlock(&cmd_queue_lock);
-
-        printf("Please submit a batch processing job_struct:\n");
-        printf(">");
-        pthread_mutex_lock(&cmd_queue_lock);
-		addJob(newJob("./process", 10, 10, 10, "Pending"));
-        printf("In commandline: job_structQueueBuffer[%d] = %s\n", buf_head, jobQueueBuffer[buf_head].jobName);
-
-        count++;
-
-        /* Move buf_head forward, this is a circular queue */
-        buf_head++;
-        if (buf_head == CMD_BUF_SIZE)
-            buf_head = 0;
-
-        pthread_cond_signal(&cmd_buf_not_empty);
-        /* Unlok the shared command queue */
-        pthread_mutex_unlock(&cmd_queue_lock);
-
-    } /* end for */
+   } /* end for */
+   
+   printf("\nscheduler ended\n");
+   atomic_flag_clear(&aflag);
+   jobQueueNotEmpty();
 }

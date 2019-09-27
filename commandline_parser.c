@@ -137,7 +137,7 @@ int cmd_quit(int nargs, char **args) {
     printf("Throughput: %.2f\n", throughput);
 
     FILE *file;
-    file = fopen("performance_output", "w");
+    file = fopen0("performance_output", "w");
 
     fprintf(file, "Total number of jobs in the queue: %d\n", unfinish_size + finish_size);
     fprintf(file, "Average turnaround time: %.2f\n", average_turnaround_time);

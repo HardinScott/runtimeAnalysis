@@ -27,6 +27,5 @@ int cmd_helpmenu(int n, char **a);
 
 int cmd_dispatch(char *cmd);
 
-int parserStart();
 
 #endif
