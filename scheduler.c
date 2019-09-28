@@ -20,19 +20,11 @@
 extern atomic_flag aflag;
 
 void *commandline(void *ptr) {
-    char *message;
-    u_int i;
-    char num_str[8];
-    size_t command_size;
-    message = (char *) ptr;
-    printf("%s \n", message);
-
-    /* Enter multiple commands in the queue to be scheduled */
-    for (i = 0; i < NUM_OF_CMD; i++) {
-		
-        
-
-   } /* end for */
+    while(1){
+	char holder[100];
+	fgets(holder, 100, stdin);
+	cmd_dispatch(holder);
+    }
    printf("\nscheduler ended\n");
    
    exitQueue();//tell run to stop looking for job_queue
