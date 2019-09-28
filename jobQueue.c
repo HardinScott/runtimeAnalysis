@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+//FCFS = 1
+//SJF = 2
+//Priority = 3
+int schedualType = 1;
 
 /*prototypes*/
 static void displayJob(job_struct element);	//displays job_struct content
@@ -615,10 +619,18 @@ static void listJobsInQueueWithoutLock()
 		{
 			i = 0;
 		}
-		printf("\nName: %s CPU_Time: %d Pri: %d Arrival_time: ? Progress: %s",
+		printf("\nName: %s CPU_Time: %d Pri: %d Arrival_time: ? Progress: %s\n",
 			job_queue_buffer[i].job_name,
 			job_queue_buffer[i].execution_time,
 			job_queue_buffer[i].priority,
 			job_queue_buffer[i].status);
 	}
+}
+
+int getSchedType(){
+    return schedualType;
+}
+
+void setSchedType(int type){
+    schedualType = type;
 }

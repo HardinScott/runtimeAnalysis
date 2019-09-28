@@ -14,10 +14,10 @@
 //1 is FCFS
 //2 is SJF
 //3 is Priority
-int schedType = 1;
+int schedualType;
 
 //sched functions
-void getSchedType();
+int getSchedType();
 void setSchedType(int type);
 
 //struct variables
