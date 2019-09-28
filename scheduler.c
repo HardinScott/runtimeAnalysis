@@ -15,6 +15,7 @@
 #include "scheduler.h"
 #include "jobQueue.h"
 #include <stdatomic.h>
+#include "commandline_parser.h"
 
 
 extern atomic_flag aflag;
