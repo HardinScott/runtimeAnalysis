@@ -125,13 +125,13 @@ void addJob(job_struct job)//use when lock is not acquired
 	
 	addJobWithoutLock(job);
 	if(getSchedType() == 1){
-	    sortByPosition();
+	    sortByPositionWithoutLock();
 	}
 	else if(getSchedType() == 2){
-	    sortByExecTime();
+	    sortByExecTimeWithoutLock();
 	}
 	else if(getSchedType() == 3){
-	    sortByPriority();
+	    sortByPriorityWithoutLock();
 	}
 	else{
 	    printf("Invalid Sort Type defaulting to FCFS\n");
@@ -337,7 +337,7 @@ static void setHeadPosWithoutLock(int headPos)
 void incrementHead()
 {
 	pthread_mutex_lock(&job_queue_lock);
-	incrementJobCountWithoutLock();
+	incrementHeadWithoutLock();
 	pthread_mutex_unlock(&job_queue_lock);
 }
 
@@ -435,7 +435,7 @@ static void incrementTailWithoutLock()
 void decrementTail() //decrement tail position
 {
 	pthread_mutex_lock(&job_queue_lock);
-	decrementJobCountWithoutLock();
+	decrementTailWithoutLock();
 	pthread_mutex_unlock(&job_queue_lock);
 }
 
@@ -510,31 +510,37 @@ void sortByPosition()
 
 static void sortByPositionWithoutLock()
 {
-	for(int i = getTailPosWithoutLock(); i != getHeadPosWithoutLock(); i++)
+	int tail = getTailPosWithoutLock();
+	int chkTail = tail + 1;
+	for(int i = 0; i < job_count; i++)
 	{
 		if(job_queue_buffer[i].status == "RUNNING")
 		{
 			i++;
-		}
-		if(i == JOB_BUF_SIZE)
-		{
-			i = 0;
+			tail++;
 		}
 		
-		for (int j = i + 1; j != getHeadPosWithoutLock(); ++j)
+		if(i == JOB_BUF_SIZE)
+		{
+			tail = 0;
+		}
+		
+		for (int j = i + 1; j < job_count; ++j)
         {
 			if(j == JOB_BUF_SIZE)
 			{
-				j = 0;
+				chkTail = 0;
 			}
 				
-			if (job_queue_buffer[i].arrival_position > job_queue_buffer[j].arrival_position) 
+			if (job_queue_buffer[tail].arrival_position > job_queue_buffer[chkTail].arrival_position) 
             {
  
-				switchJobsInQueueWithoutLock(i, j);
+				switchJobsInQueueWithoutLock(tail, chkTail);
  
             }
+			chkTail++;
 		}
+	tail++;
 	}
 }
 
@@ -548,32 +554,37 @@ void sortByExecTime()
 
 static void sortByExecTimeWithoutLock()
 {
-	for(int i = getTailPosWithoutLock(); i != getHeadPosWithoutLock(); i++)
+	int tail = getTailPosWithoutLock();
+	int chkTail = tail + 1;
+	for(int i = 0; i < job_count; i++)
 	{
 		if(job_queue_buffer[i].status == "RUNNING")
 		{
 			i++;
+			tail++;
 		}
 		
 		if(i == JOB_BUF_SIZE)
 		{
-			i = 0;
+			tail = 0;
 		}
 		
-		for (int j = i + 1; j != getHeadPosWithoutLock(); ++j)
+		for (int j = i + 1; j < job_count; ++j)
         {
 			if(j == JOB_BUF_SIZE)
 			{
-				j = 0;
+				chkTail = 0;
 			}
 				
-			if (job_queue_buffer[i].execution_time > job_queue_buffer[j].execution_time) 
+			if (job_queue_buffer[tail].execution_time > job_queue_buffer[chkTail].execution_time) 
             {
  
-				switchJobsInQueueWithoutLock(i, j);
+				switchJobsInQueueWithoutLock(tail, chkTail);
  
             }
+			chkTail++;
 		}
+	tail++;
 	}
 }
 
@@ -587,32 +598,37 @@ void sortByPriority()
 
 static void sortByPriorityWithoutLock()
 {
-	for(int i = getTailPosWithoutLock(); i != getHeadPosWithoutLock(); i++)
+	int tail = getTailPosWithoutLock();
+	int chkTail = tail + 1;
+	for(int i = 0; i < job_count; i++)
 	{
 		if(job_queue_buffer[i].status == "RUNNING")
 		{
 			i++;
+			tail++;
 		}
 		
 		if(i == JOB_BUF_SIZE)
 		{
-			i = 0;
+			tail = 0;
 		}
 		
-		for (int j = i + 1; j != getHeadPosWithoutLock(); ++j)
+		for (int j = i + 1; j < job_count; ++j)
         {
 			if(j == JOB_BUF_SIZE)
 			{
-				j = 0;
+				chkTail = 0;
 			}
 				
-			if (job_queue_buffer[i].priority > job_queue_buffer[j].priority) 
+			if (job_queue_buffer[tail].priority > job_queue_buffer[chkTail].priority) 
             {
  
-				switchJobsInQueueWithoutLock(i, j);
+				switchJobsInQueueWithoutLock(tail, chkTail);
  
             }
+			chkTail++;
 		}
+	tail++;
 	}
 }
 
