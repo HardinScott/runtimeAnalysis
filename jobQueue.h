@@ -36,6 +36,14 @@ void runJob(); //run job from tail of job queue
 
 void jobQueueNotEmpty();
 
+void sortByPosition();
+
+void sortByExecTime();
+
+void sortByPriority();
+
+void listJobsInQueue();
+
 /*job count functions*/
 void incrementJobCount(); //decrements job_count by 1
 
@@ -48,6 +56,8 @@ int isEmpty(); //if job queue is empty returns 1 else 0
 int isFull(); //if job queue is full returns 1 else 0
 
 job_struct getElementAtPos(int pos); //returns element at pos
+
+void exitQueue(); //set exitQueueFlag to 1 don't wait for job_buf_not_empty in run
 
 static void switchJobsInQueueWithoutLock(int posJobA, int posJobB); //swaps elements in job queue at position a and b
 

@@ -27,6 +27,11 @@ static int getTailPosWithoutLock(); //returns buf_tail when lock has been previo
 static job_struct getTailElementWithoutLock(); //returns element at buf_tail when lock has been previously acquired
 static job_struct getElementAtPosWithoutLock(int pos); //returns element at position when lock has been previously acquired
 static void switchJobsInQueueWithoutLock(int posJobA, int posJobB); //swaps elements in job queue at position a and b when lock has been previously acquired
+static void sortByPositionWithoutLock();
+static void sortByExecTimeWithoutLock();
+static void sortByPriorityWithoutLock();
+static void listJobsInQueueWithoutLock();
+static void exitQueueWithoutLock();
 
 /*pthread mutex and condition variables*/
 pthread_mutex_t job_queue_lock;  /* Lock for critical sections */
@@ -44,6 +49,7 @@ pthread_cond_t job_buf_not_empty; /* Condition variable for buf_not_empty */
 static int buf_head;
 static int buf_tail;
 static int job_count;
+static int exitQueueFlag;
 static job_struct job_queue_buffer[JOB_BUF_SIZE];
 
 /*struct variables*/
@@ -62,6 +68,8 @@ void jobQueueNotEmpty()
 void initJobQueue()
 {
 	/* Initialize count, two buffer pointers */
+	
+	exitQueueFlag = 0;
     job_count = 0;
     buf_head = 0;
     buf_tail = 0;
@@ -76,6 +84,20 @@ void initMutex()
     pthread_cond_init(&job_buf_not_empty, NULL);
 }
 
+/*changes exitQueueFlag to one to stop run from waiting for condition signal*/
+void exitQueue()
+{
+	pthread_mutex_lock(&job_queue_lock);
+	
+	exitQueueWithoutLock();
+	
+    pthread_mutex_unlock(&job_queue_lock);
+}
+
+static void exitQueueWithoutLock()
+{
+	exitQueueFlag = 1;
+}
 /*creates a new job*/
 job_struct newJob(char* job_name, int arrival_position, int execution_time, int priority, char* status)
 {	
@@ -123,32 +145,49 @@ static void addJobWithoutLock(job_struct job)//For when lock has been previously
 void runJob()
 {
 	/* lock and unlock for the shared process queue */
-        pthread_mutex_lock(&job_queue_lock);
-        
-        while (isEmptyWithoutLock() == 1) {
-            pthread_cond_wait(&job_buf_not_empty, &job_queue_lock);
-        }
-		
-		if(isEmptyWithoutLock() == 0)
+    pthread_mutex_lock(&job_queue_lock);
+	
+    if(exitQueueFlag == 0) //if exitQueueFlag 1 don't wait for job_buf_not_empty
+	{
+		while (isEmptyWithoutLock() == 1) //if empty wait for job_buf_not_empty
 		{
-			/* Run the command scheduled in the queue */
-			decrementJobCountWithoutLock;
-			printf("In executor: job_structQueueBuffer[%d] = %s\n", buf_tail, job_queue_buffer[buf_tail].job_name);
-			
-			char* args[] = {job_queue_buffer[buf_tail].job_name,NULL};
-			/*
-			* Note: system() function is a simple example.
-			* You should use execv() rather than system() here.
-			*/
-			execv("./", args);
-
-			/* Move buf_tail forward, this is a circular queue */
-			incrementTailWithoutLock();
-			decrementJobCountWithoutLock();
-			pthread_cond_signal(&job_buf_not_full);
-			/* Unlock the shared command queue */
-			pthread_mutex_unlock(&job_queue_lock);
+			pthread_cond_wait(&job_buf_not_empty, &job_queue_lock);
 		}
+	}
+		
+	if(isEmptyWithoutLock() == 0)
+	{
+		printf("\nin\n");
+		/* Run the command scheduled in the queue */
+		decrementJobCountWithoutLock;
+		printf("In executor: job_structQueueBuffer[%d] = %s\n", buf_tail, job_queue_buffer[buf_tail].job_name);
+			
+		char* args[] = {job_queue_buffer[buf_tail].job_name,NULL};
+		/*
+		* Note: system() function is a simple example.
+		* You should use execv() rather than system() here.
+		*/
+
+		pid_t pid = fork();
+		
+		if(pid < 0)
+		{
+			perror("fork failed.");
+		}
+		
+		else if (pid == 0)
+		{
+			//child execs
+			execv(args[0], args);
+		}
+		/* Move buf_tail forward, this is a circular queue */
+		incrementTailWithoutLock();
+		decrementJobCountWithoutLock();
+		pthread_cond_signal(&job_buf_not_full);
+		printf("\nout\n");
+		
+	}
+	pthread_mutex_unlock(&job_queue_lock);
 }
 /*Switches jobs at position A and position B*/
 void switchJobsInQueue(int posJobA, int posJobB)
@@ -435,4 +474,126 @@ job_struct getElementAtPos(int pos)
 static job_struct getElementAtPosWithoutLock(int pos)
 {
 	return job_queue_buffer[pos];
+}
+
+/*sorts job by position*/
+void sortByPosition()
+{
+	pthread_mutex_lock(&job_queue_lock);
+	sortByPositionWithoutLock();
+	pthread_mutex_unlock(&job_queue_lock);
+}
+
+static void sortByPositionWithoutLock()
+{
+	for(int i = getTailPosWithoutLock() + 1; i != getHeadPosWithoutLock(); i++)
+	{
+		if(i == JOB_BUF_SIZE)
+		{
+			i = 0;
+		}
+		
+		for (int j = i + 1; j != getHeadPosWithoutLock(); ++j)
+        {
+			if(j == JOB_BUF_SIZE)
+			{
+				j = 0;
+			}
+				
+			if (job_queue_buffer[i].arrival_position > job_queue_buffer[j].arrival_position) 
+            {
+ 
+				switchJobsInQueueWithoutLock(i, j);
+ 
+            }
+		}
+	}
+}
+
+/*Sort by execution time*/
+void sortByExecTime()
+{
+	pthread_mutex_lock(&job_queue_lock);
+	sortByExecTimeWithoutLock();
+	pthread_mutex_unlock(&job_queue_lock);
+}
+
+static void sortByExecTimeWithoutLock()
+{
+	for(int i = getTailPosWithoutLock() + 1; i != getHeadPosWithoutLock(); i++)
+	{
+		if(i == JOB_BUF_SIZE)
+		{
+			i = 0;
+		}
+		
+		for (int j = i + 1; j != getHeadPosWithoutLock(); ++j)
+        {
+			if(j == JOB_BUF_SIZE)
+			{
+				j = 0;
+			}
+				
+			if (job_queue_buffer[i].execution_time > job_queue_buffer[j].execution_time) 
+            {
+ 
+				switchJobsInQueueWithoutLock(i, j);
+ 
+            }
+		}
+	}
+}
+
+/*Sort by priority*/
+void sortByPriority()
+{
+	pthread_mutex_lock(&job_queue_lock);
+	sortByPriorityWithoutLock();
+	pthread_mutex_unlock(&job_queue_lock);
+}
+
+static void sortByPriorityWithoutLock()
+{
+	for(int i = getTailPosWithoutLock() + 1; i != getHeadPosWithoutLock(); i++)
+	{
+		if(i == JOB_BUF_SIZE)
+		{
+			i = 0;
+		}
+		
+		for (int j = i + 1; j != getHeadPosWithoutLock(); ++j)
+        {
+			if(j == JOB_BUF_SIZE)
+			{
+				j = 0;
+			}
+				
+			if (job_queue_buffer[i].priority > job_queue_buffer[j].priority) 
+            {
+ 
+				switchJobsInQueueWithoutLock(i, j);
+ 
+            }
+		}
+	}
+}
+
+void listJobsInQueue()
+{
+	pthread_mutex_lock(&job_queue_lock);
+	listJobsInQueueWithoutLock();
+	pthread_mutex_unlock(&job_queue_lock);
+}
+
+static void listJobsInQueueWithoutLock()
+{
+
+	for(int i = getTailPosWithoutLock(); i != getHeadPosWithoutLock(); i++)
+	{
+		printf("\nName: %s CPU_Time: %d Pri: %d Arrival_time: ? Progress: %s",
+			job_queue_buffer[i].job_name,
+			job_queue_buffer[i].execution_time,
+			job_queue_buffer[i].priority,
+			job_queue_buffer[i].status);
+	}
 }

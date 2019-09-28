@@ -60,7 +60,7 @@ int main() {
 	
 
     /* Wait till threads are complete before main continues. Unless we  */
-    /* wait we run the risk of executing an exit which will terminate   */
+    /* wait we run the risk of executing an exitQueueFlag which will terminate   */
     /* the process and all threads before the threads have completed.   */
     pthread_join(command_thread, NULL);
     pthread_join(executor_thread, NULL);
