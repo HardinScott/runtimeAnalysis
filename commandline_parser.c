@@ -68,67 +68,27 @@ int cmd_list(int nargs, char **args){
 
 int cmd_fcfs(int nargs, char **args){
     setSchedType(1);
+    sortByPosition();
+    printf("Now Sorting By FCFS, sorted %d items is in queue\n", getJobCount());
     return 0;
 }
 
 int cmd_sjf(int nargs, char **args){
     setSchedType(2);
+    sortByExecTime();
+    printf("Now Sorting By SJF, sorted %d items is in queue\n", getJobCount());
     return 0;
 }
 
 int cmd_priority(int nargs, char **args){
     setSchedType(3);
+    sortByPriority();
+    printf("Now Sorting By priority, sorted %d items is in queue\n", getJobCount());
     return 0;
 
 }
 
 int cmd_quit(int nargs, char **args) {
-/*    int unfinish_size = job_queue.num;
-    int finish_size = finished_job_queue.num;
-    double average_turnaround_time = 0.0;
-    double average_CPU_time = 0.0;
-    double average_waiting_time = 0.0;
-    double throughput = 0.0;
-
-    if(unfinish_size != 0 || finish_size != 0){
-        average_turnaround_time = calc_avg_turnaround_time();
-        if(average_turnaround_time < 0)
-            average_turnaround_time = 0;
-
-        average_CPU_time = calc_avg_cpu_time();
-        if(average_CPU_time < 0)
-            average_CPU_time = 0;
-
-        average_waiting_time = calc_avg_waiting_time();
-        if(average_waiting_time < 0)
-            average_waiting_time = 0;
-
-        throughput = calc_throughput();
-        if(throughput < 0)
-            throughput = 0;
-
-    }
-
-
-
-    printf("Total number of jobs in the queue: %d\n", unfinish_size + finish_size);
-    printf("Average turnaround time: %.2f\n", average_turnaround_time);
-    printf("Average CPU time: %.2f\n", average_CPU_time);
-    printf("Average waiting time: %.2f\n", average_waiting_time);
-    printf("Throughput: %.2f\n", throughput);
-
-    FILE *file;
-    file = fopen0("performance_output", "w");
-
-    fprintf(file, "Total number of jobs in the queue: %d\n", unfinish_size + finish_size);
-    fprintf(file, "Average turnaround time: %.2f\n", average_turnaround_time);
-    fprintf(file, "Average CPU time: %.2f\n", average_CPU_time);
-    fprintf(file, "Average waiting time: %.2f\n", average_waiting_time);
-    fprintf(file, "Throughput: %.2f\n", throughput);
-
-
-    */
-    printf("you submitted command:cmd_exit\n" );
     exit(0);
 }
 

@@ -124,6 +124,19 @@ void addJob(job_struct job)//use when lock is not acquired
     pthread_mutex_lock(&job_queue_lock);
 	
 	addJobWithoutLock(job);
+	if(getSchedType() == 1){
+	    sortByPosition();
+	}
+	else if(getSchedType() == 2){
+	    sortByExecTime();
+	}
+	else if(getSchedType() == 3){
+	    sortByPriority();
+	}
+	else{
+	    printf("Invalid Sort Type defaulting to FCFS\n");
+	    sortByPosition();
+	}
 	
     pthread_mutex_unlock(&job_queue_lock);
 }
