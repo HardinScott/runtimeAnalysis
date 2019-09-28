@@ -24,17 +24,6 @@
 #define E2BIG        2
 #define MAXJOB       100
 #define MAXMENUARGS  7
-atomic_int aflag = ATOMIC_FLAG_INIT;
-int main(){
-    initJobQueue;
-    initMutex();
-    atomic_flag_test_and_set(&aflag);
-    while(1){
-    char input[50];
-    cmd_dispatch(fgets(input, 50, stdin));
-    }
-    return 0;
-}
 
 int cmd_run(int nargs, char **args) {
     time_t arr_timep;
