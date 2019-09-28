@@ -10,6 +10,15 @@
 #define NUM_OF_CMD   5  // The number of submitted jobs   
 #define MAX_CMD_LEN  512 // The longest commandline length
 
+//sched value holder
+//1 is FCFS
+//2 is SJF
+//3 is Priority
+int schedType;
+
+//sched functions
+void getSchedType();
+void setSchedType(int type);
 
 //struct variables
 typedef struct{
@@ -18,6 +27,7 @@ typedef struct{
 	int execution_time;
 	int priority;
 	char* status; //change status function needed in jobQueue.c
+	time_t arrival_time;
 }job_struct;
 
 
@@ -28,7 +38,7 @@ void initJobQueue(); //initializes job_count, buf_head, and buf_tail
 void initMutex(); //initialize mutex lock and conditions
 
 /*Job Create,Add and Run functions*/
-job_struct newJob(char* job_name, int arrival_position, int execution_time, int priority, char* status);
+job_struct newJob(char* job_name, int arrival_position, int execution_time, int priority);
 
 void addJob(job_struct job); //adds job to job queue
 

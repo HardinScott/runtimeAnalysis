@@ -16,16 +16,27 @@
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
+#include "jobQueue.h"
+#include <stdatomic.h>
 
 /* Error Code */
 #define EINVAL       1
 #define E2BIG        2
 #define MAXJOB       100
 #define MAXMENUARGS  7
-
+atomic_int aflag = ATOMIC_FLAG_INIT;
+int main(){
+    initJobQueue;
+    initMutex();
+    atomic_flag_test_and_set(&aflag);
+    while(1){
+    char input[50];
+    cmd_dispatch(fgets(input, 50, stdin));
+    }
+    return 0;
+}
 
 int cmd_run(int nargs, char **args) {
-/*
     time_t arr_timep;
 
     if (nargs != 4) {
@@ -40,63 +51,33 @@ int cmd_run(int nargs, char **args) {
     sscanf(args[2], "%d", &cpu_time);
     sscanf(args[3], "%d", &pri);
 
-    JobData new_job = JobData_defult;
-    strcat(new_job.name, job);
-    new_job.CPU_time = cpu_time;
-    new_job.priority = pri;
+    job_struct new_job = newJob(job, 0, cpu_time, pri);
 
-    arr_timep = time(NULL);
-    new_job.arrival_time = arr_timep;
-
-    InsertNewJob(new_job);
+    addJob(new_job);
 
     printf("Job %s was submitted.\n", job);
-    int job_size = job_queue.num;
 
-    printf("Total number of jobs in the queue: %d\n", job_size);
-    printf("Scheduling Policy: %s\n", policy_name[scheduling_policy]);
-
-    */
-    printf("you submitted command: cmd_run \n" );
     return 0; /* if succeed */
 
 }
 
 int cmd_list(int nargs, char **args){
-//    ListJobQueue();
-    printf("you submitted command: cmd_list \n");
+    listJobsInQueue();
     return 0;
 }
 
 int cmd_fcfs(int nargs, char **args){
-/*
-    enum policy set_policy = FCFS;
-    int job_size = job_queue.num;
-    SwichScheduler(set_policy);
-    printf("Scheduling plolicy is swithced to FCFS. All the %d waiting jobs have been rescheduled.\n", job_size);
-*/
-    printf("you submitted command:cmd_fcfs\n" );
+    setSchedType(1);
     return 0;
 }
 
 int cmd_sjf(int nargs, char **args){
-/*
-    enum policy set_policy = SJF;
-    int job_size = job_queue.num;
-    SwichScheduler(set_policy);
-    printf("Scheduling plolicy is swithced to SJF. All the %d waiting jobs have been rescheduled.\n", job_size);
-*/
-    printf("you submitted command:cmd_sjf\n");
+    setSchedType(2);
     return 0;
 }
 
 int cmd_priority(int nargs, char **args){
-/*    enum policy set_policy = Priority;
-    int job_size = job_queue.num;
-    SwichScheduler(set_policy);
-    printf("Scheduling plolicy is swithced to Priority. All the %d waiting jobs have been rescheduled.\n", job_size);
-*/
-    printf("you submitted command:cmd_priority\n" );
+    setSchedType(3);
     return 0;
 
 }
