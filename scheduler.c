@@ -30,8 +30,7 @@ void *commandline(void *ptr) {
     /* Enter multiple commands in the queue to be scheduled */
     for (i = 0; i < NUM_OF_CMD; i++) {
 		
-		addJob(newJob("./process", 10, 10, 10, "Pending"));
-        printf("In jobQueue: QueueBuffer[%d]", getJobCount());        
+        
 
    } /* end for */
    printf("\nscheduler ended\n");

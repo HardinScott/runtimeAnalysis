@@ -2,9 +2,11 @@
 #include "jobQueue.h"
 #include <pthread.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 
 /*prototypes*/
@@ -99,15 +101,15 @@ static void exitQueueWithoutLock()
 	exitQueueFlag = 1;
 }
 /*creates a new job*/
-job_struct newJob(char* job_name, int arrival_position, int execution_time, int priority, char* status)
+job_struct newJob(char* job_name, int arrival_position, int execution_time, int priority)
 {	
 	job_struct new_job;
 	new_job.job_name = job_name;
 	new_job.arrival_position = arrival_position;
 	new_job.execution_time = execution_time;
 	new_job.priority = priority;
-	new_job.status = status;
-	
+	new_job.status = "PENDING";
+
 	return new_job;
 }
 
@@ -179,6 +181,11 @@ void runJob()
 		{
 			//child execs
 			execv(args[0], args);
+		}
+			
+		else
+		{
+		wait(NULL);
 		}
 		/* Move buf_tail forward, this is a circular queue */
 		incrementTailWithoutLock();
@@ -486,8 +493,12 @@ void sortByPosition()
 
 static void sortByPositionWithoutLock()
 {
-	for(int i = getTailPosWithoutLock() + 1; i != getHeadPosWithoutLock(); i++)
+	for(int i = getTailPosWithoutLock(); i != getHeadPosWithoutLock(); i++)
 	{
+		if(job_queue_buffer[i].status == "RUNNING")
+		{
+			i++;
+		}
 		if(i == JOB_BUF_SIZE)
 		{
 			i = 0;
@@ -520,8 +531,13 @@ void sortByExecTime()
 
 static void sortByExecTimeWithoutLock()
 {
-	for(int i = getTailPosWithoutLock() + 1; i != getHeadPosWithoutLock(); i++)
+	for(int i = getTailPosWithoutLock(); i != getHeadPosWithoutLock(); i++)
 	{
+		if(job_queue_buffer[i].status == "RUNNING")
+		{
+			i++;
+		}
+		
 		if(i == JOB_BUF_SIZE)
 		{
 			i = 0;
@@ -554,8 +570,13 @@ void sortByPriority()
 
 static void sortByPriorityWithoutLock()
 {
-	for(int i = getTailPosWithoutLock() + 1; i != getHeadPosWithoutLock(); i++)
+	for(int i = getTailPosWithoutLock(); i != getHeadPosWithoutLock(); i++)
 	{
+		if(job_queue_buffer[i].status == "RUNNING")
+		{
+			i++;
+		}
+		
 		if(i == JOB_BUF_SIZE)
 		{
 			i = 0;
@@ -590,6 +611,10 @@ static void listJobsInQueueWithoutLock()
 
 	for(int i = getTailPosWithoutLock(); i != getHeadPosWithoutLock(); i++)
 	{
+		if( i == JOB_BUF_SIZE)
+		{
+			i = 0;
+		}
 		printf("\nName: %s CPU_Time: %d Pri: %d Arrival_time: ? Progress: %s",
 			job_queue_buffer[i].job_name,
 			job_queue_buffer[i].execution_time,
