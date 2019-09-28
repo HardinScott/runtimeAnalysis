@@ -14,7 +14,7 @@
 //1 is FCFS
 //2 is SJF
 //3 is Priority
-int schedType;
+int schedType = 1;
 
 //sched functions
 void getSchedType();
