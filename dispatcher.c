@@ -23,11 +23,12 @@ void *executor(void *ptr) {
 
     message = (char *) ptr;
     printf("%s \n", message);
-
+	
     do{
-        printf("In executor: count = %d\n", getJobCount());
 		
+		printf("In executor: count = %d\n", getJobCount());
 		runJob();
+		
 		
     }while(atomic_flag_test_and_set(&aflag));
 	
@@ -36,4 +37,5 @@ void *executor(void *ptr) {
 		printf("Jobs Left Before Exit: %d\n", getJobCount()); 
 		runJob();
 	}
+	
 }

@@ -38,6 +38,9 @@ static void sortByExecTimeWithoutLock();
 static void sortByPriorityWithoutLock();
 static void listJobsInQueueWithoutLock();
 static void exitQueueWithoutLock();
+static void incrementTotalCountWithoutLock();
+static void decrementTotalCountWithoutLock();
+static int getTotalCountWithoutLock();
 
 /*pthread mutex and condition variables*/
 pthread_mutex_t job_queue_lock;  /* Lock for critical sections */
@@ -55,6 +58,7 @@ pthread_cond_t job_buf_not_empty; /* Condition variable for buf_not_empty */
 static int buf_head;
 static int buf_tail;
 static int job_count;
+static int total_count;
 static int exitQueueFlag;
 static job_struct job_queue_buffer[JOB_BUF_SIZE];
 
@@ -79,6 +83,7 @@ void initJobQueue()
     job_count = 0;
     buf_head = 0;
     buf_tail = 0;
+	total_count = 0;
 }
 
 /*initialize mutex lock and conditions*/
@@ -108,12 +113,14 @@ static void exitQueueWithoutLock()
 job_struct newJob(char* job_name, int arrival_position, int execution_time, int priority)
 {	
 	job_struct new_job;
+	printf("\njob name: %s added.\n", job_name);
 	new_job.job_name = job_name;
 	new_job.arrival_position = arrival_position;
 	new_job.execution_time = execution_time;
 	new_job.priority = priority;
-	new_job.status = "PENDING";
-
+	new_job.status = malloc(sizeof(char) * 254);
+	strcpy(new_job.status, "PENDING");
+	printf("\nnew_job.job_name: %s\n", new_job.job_name);
 	return new_job;
 }
 
@@ -135,7 +142,7 @@ void addJob(job_struct job)//use when lock is not acquired
 	}
 	else{
 	    printf("Invalid Sort Type defaulting to FCFS\n");
-	    sortByPosition();
+	    sortByPositionWithoutLock();
 	}
 	
     pthread_mutex_unlock(&job_queue_lock);
@@ -149,7 +156,10 @@ static void addJobWithoutLock(job_struct job)//For when lock has been previously
 		pthread_cond_wait(&job_buf_not_full, &job_queue_lock);
     }
 	
-	//
+	//increments total count by one and assigns to job arrival_position
+	incrementTotalCountWithoutLock();
+	job.arrival_position = getTotalCountWithoutLock();
+	
 	job_queue_buffer[buf_head] = job;
 	
 	//increment pointer variables
@@ -178,10 +188,10 @@ void runJob()
 	{
 		printf("\nin\n");
 		/* Run the command scheduled in the queue */
-		decrementJobCountWithoutLock;
 		printf("In executor: job_structQueueBuffer[%d] = %s\n", buf_tail, job_queue_buffer[buf_tail].job_name);
 			
 		char* args[] = {job_queue_buffer[buf_tail].job_name,NULL};
+		strcpy(job_queue_buffer[buf_tail].status, "RUNNING");
 		/*
 		* Note: system() function is a simple example.
 		* You should use execv() rather than system() here.
@@ -197,14 +207,23 @@ void runJob()
 		else if (pid == 0)
 		{
 			//child execs
-			execv(args[0], args);
+			int cantRun = execv(args[0], args);
+			if(cantRun == -1)
+			{
+				printf("\nCan't runn job: %s\n", job_queue_buffer[buf_tail].job_name);
+			}
+			exit(0);
 		}
 			
 		else
 		{
-		wait(NULL);
+			pthread_mutex_unlock(&job_queue_lock);
+			wait(NULL);
 		}
 		/* Move buf_tail forward, this is a circular queue */
+		pthread_mutex_lock(&job_queue_lock);
+		free(job_queue_buffer[buf_tail].job_name);
+		free(job_queue_buffer[buf_tail].status);
 		incrementTailWithoutLock();
 		decrementJobCountWithoutLock();
 		pthread_cond_signal(&job_buf_not_full);
@@ -223,7 +242,7 @@ void switchJobsInQueue(int posJobA, int posJobB)
 
 static void switchJobsInQueueWithoutLock(int posJobA, int posJobB)
 {
-	job_struct temp = getElementAtPosWithoutLock(posJobA);
+	job_struct temp = job_queue_buffer[posJobA];
 	job_queue_buffer[posJobA] = getElementAtPosWithoutLock(posJobB);
 	job_queue_buffer[posJobB] = temp;
 }
@@ -510,37 +529,41 @@ void sortByPosition()
 
 static void sortByPositionWithoutLock()
 {
-	int tail = getTailPosWithoutLock();
-	int chkTail = tail + 1;
-	for(int i = 0; i < job_count; i++)
+	int tail;
+	int chkTail;
+
+	for(int i = 0; i < job_count - 2; i++)
 	{
-		if(job_queue_buffer[i].status == "RUNNING")
-		{
-			i++;
-			tail++;
-		}
+		tail = getTailPosWithoutLock() + 1;
 		
-		if(i == JOB_BUF_SIZE)
-		{
-			tail = 0;
-		}
 		
-		for (int j = i + 1; j < job_count; ++j)
+		
+		for (int j = 0; j < job_count - i - 2; ++j)
         {
-			if(j == JOB_BUF_SIZE)
+			
+			if(tail >= JOB_BUF_SIZE)
+			{
+				tail = 0;
+			}
+			
+			
+			chkTail = tail + 1;
+			
+			if(chkTail >= JOB_BUF_SIZE)
 			{
 				chkTail = 0;
 			}
 				
-			if (job_queue_buffer[tail].arrival_position > job_queue_buffer[chkTail].arrival_position) 
+			if (job_queue_buffer[tail].priority > job_queue_buffer[chkTail].priority) 
             {
  
 				switchJobsInQueueWithoutLock(tail, chkTail);
  
             }
-			chkTail++;
+			
+			tail++;
 		}
-	tail++;
+	
 	}
 }
 
@@ -554,24 +577,25 @@ void sortByExecTime()
 
 static void sortByExecTimeWithoutLock()
 {
-	int tail = getTailPosWithoutLock();
-	int chkTail = tail + 1;
-	for(int i = 0; i < job_count; i++)
+	int tail;
+	int chkTail;
+
+	for(int i = 0; i < job_count - 2; i++)
 	{
-		if(job_queue_buffer[i].status == "RUNNING")
-		{
-			i++;
-			tail++;
-		}
+		tail = getTailPosWithoutLock() + 1;
 		
-		if(i == JOB_BUF_SIZE)
-		{
-			tail = 0;
-		}
-		
-		for (int j = i + 1; j < job_count; ++j)
+		for (int j = 0; j < job_count - i - 2; ++j)
         {
-			if(j == JOB_BUF_SIZE)
+			if(tail >= JOB_BUF_SIZE)
+			{
+				tail = 0;
+			}
+			
+			chkTail = tail + 1;
+			
+		
+			
+			if(chkTail >= JOB_BUF_SIZE)
 			{
 				chkTail = 0;
 			}
@@ -582,9 +606,12 @@ static void sortByExecTimeWithoutLock()
 				switchJobsInQueueWithoutLock(tail, chkTail);
  
             }
-			chkTail++;
+			
+			tail++;
+			
+			
 		}
-	tail++;
+	
 	}
 }
 
@@ -598,24 +625,24 @@ void sortByPriority()
 
 static void sortByPriorityWithoutLock()
 {
-	int tail = getTailPosWithoutLock();
-	int chkTail = tail + 1;
-	for(int i = 0; i < job_count; i++)
+	int tail;
+	int chkTail;
+
+	for(int i = 0; i < job_count - 2; i++)
 	{
-		if(job_queue_buffer[i].status == "RUNNING")
-		{
-			i++;
-			tail++;
-		}
+		tail = getTailPosWithoutLock() + 1;
 		
-		if(i == JOB_BUF_SIZE)
-		{
-			tail = 0;
-		}
-		
-		for (int j = i + 1; j < job_count; ++j)
+		for (int j = 0; j < job_count - i - 2; ++j)
         {
-			if(j == JOB_BUF_SIZE)
+			
+			if(tail >= JOB_BUF_SIZE)
+			{
+				tail = 0;
+			}
+			
+			chkTail = tail + 1;
+			
+			if(chkTail >= JOB_BUF_SIZE)
 			{
 				chkTail = 0;
 			}
@@ -626,13 +653,16 @@ static void sortByPriorityWithoutLock()
 				switchJobsInQueueWithoutLock(tail, chkTail);
  
             }
-			chkTail++;
+			
+			tail++;
+			
 		}
-	tail++;
+	
 	}
 }
 
-void listJobsInQueue()
+/*fix mew/
+*/void listJobsInQueue()
 {
 	pthread_mutex_lock(&job_queue_lock);
 	listJobsInQueueWithoutLock();
@@ -641,19 +671,23 @@ void listJobsInQueue()
 
 static void listJobsInQueueWithoutLock()
 {
-
-	for(int i = getTailPosWithoutLock(); i != getHeadPosWithoutLock(); i++)
+	int tail = buf_tail;
+	
+	for(int i = 0; i < job_count; i++)
 	{
-		if( i == JOB_BUF_SIZE)
+		if(tail >= JOB_BUF_SIZE)
 		{
-			i = 0;
+			tail = 0;
 		}
 		printf("\nName: %s CPU_Time: %d Pri: %d Arrival_time: ? Progress: %s\n",
-			job_queue_buffer[i].job_name,
-			job_queue_buffer[i].execution_time,
-			job_queue_buffer[i].priority,
-			job_queue_buffer[i].status);
+				job_queue_buffer[tail].job_name,
+				job_queue_buffer[tail].execution_time,
+				job_queue_buffer[tail].priority,
+				job_queue_buffer[tail].status);
+		
+		tail++;
 	}
+	
 }
 
 int getSchedType(){
@@ -662,4 +696,45 @@ int getSchedType(){
 
 void setSchedType(int type){
     schedualType = type;
+}
+
+
+/*increments the total count submitted*/
+
+void incrementTotalCount()
+{
+	pthread_mutex_unlock(&job_queue_lock);
+	incrementTotalCountWithoutLock();
+	pthread_mutex_unlock(&job_queue_lock);
+}
+
+static void incrementTotalCountWithoutLock()
+{
+	total_count++;
+}
+
+/*decrements the total count submitted*/
+void decrementTotalCount()
+{
+	pthread_mutex_unlock(&job_queue_lock);
+	decrementTotalCountWithoutLock();
+	pthread_mutex_unlock(&job_queue_lock);
+}
+
+static void decrementTotalCountWithoutLock()
+{
+	total_count++;
+}
+
+
+int getTotalCount()
+{
+	pthread_mutex_unlock(&job_queue_lock);
+	getTotalCountWithoutLock();
+	pthread_mutex_unlock(&job_queue_lock);
+}
+
+static int getTotalCountWithoutLock()
+{
+	return total_count;
 }

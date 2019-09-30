@@ -33,10 +33,11 @@ int cmd_run(int nargs, char **args) {
         return EINVAL;
     }
 
-    char *job = args[1];
+    char *job = malloc(sizeof(char) * 254);
     int cpu_time = 0;
     int pri = 0;
-
+	
+	strcpy(job, args[1]);
     sscanf(args[2], "%d", &cpu_time);
     sscanf(args[3], "%d", &pri);
 
