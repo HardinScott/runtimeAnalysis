@@ -120,6 +120,7 @@ job_struct newJob(char* job_name, int arrival_position, int execution_time, int 
 	new_job.priority = priority;
 	new_job.status = malloc(sizeof(char) * 254);
 	strcpy(new_job.status, "PENDING");
+	time(&new_job.arrival_time);
 	printf("\nnew_job.job_name: %s\n", new_job.job_name);
 	return new_job;
 }
@@ -679,10 +680,11 @@ static void listJobsInQueueWithoutLock()
 		{
 			tail = 0;
 		}
-		printf("\nName: %s CPU_Time: %d Pri: %d Arrival_time: ? Progress: %s\n",
+		printf("\nName: %s CPU_Time: %d Pri: %d Arrival_time: %s Progress: %s\n",
 				job_queue_buffer[tail].job_name,
 				job_queue_buffer[tail].execution_time,
 				job_queue_buffer[tail].priority,
+				ctime(&job_queue_buffer[tail].arrival_time),
 				job_queue_buffer[tail].status);
 		
 		tail++;
