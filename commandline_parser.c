@@ -79,7 +79,7 @@ int cmd_priority(int nargs, char **args){
 }
 
 int cmd_quit(int nargs, char **args) {
-    exit(0);
+    return 2;
 }
 
 int cmd_test(int nargs, char **args){
@@ -327,10 +327,11 @@ positive integer	if the ASCII value of first unmatched character is greater than
 
     //Step 2: Call function through the cmd_table
             result = cmdtable[i].func(nargs, args);
-            return result;
+			return result;
+            
         }
     }
-
+	
     printf("%s: Command not found\n", args[0]);
     return EINVAL;
 }

@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include "performance.h"
+
 //FCFS = 1
 //SJF = 2
 //Priority = 3
@@ -187,10 +189,14 @@ void runJob()
 		
 	if(isEmptyWithoutLock() == 0)
 	{
-		printf("\nin\n");
+		int cantRun = 0;
+		printf("\nin\n"); //remove me!
 		/* Run the command scheduled in the queue */
 		printf("In executor: job_structQueueBuffer[%d] = %s\n", buf_tail, job_queue_buffer[buf_tail].job_name);
-			
+		/*get execute time*/
+		time_t execT;
+		time(&execT);
+		
 		char* args[] = {job_queue_buffer[buf_tail].job_name,NULL};
 		strcpy(job_queue_buffer[buf_tail].status, "RUNNING");
 		/*
@@ -208,7 +214,7 @@ void runJob()
 		else if (pid == 0)
 		{
 			//child execs
-			int cantRun = execv(args[0], args);
+			cantRun = execv(args[0], args);
 			if(cantRun == -1)
 			{
 				printf("\nCan't runn job: %s\n", job_queue_buffer[buf_tail].job_name);
@@ -220,6 +226,15 @@ void runJob()
 		{
 			pthread_mutex_unlock(&job_queue_lock);
 			wait(NULL);
+			
+			if(cantRun != -1)
+			{
+				time_t endT;
+				time(&endT);
+				printf("\nend time: %ld", endT);
+				job_rec_struct rec = newRecord(job_queue_buffer[buf_tail].arrival_time, execT, endT);
+				insertRecord(rec);
+			}
 		}
 		/* Move buf_tail forward, this is a circular queue */
 		pthread_mutex_lock(&job_queue_lock);

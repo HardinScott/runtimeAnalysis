@@ -14,6 +14,7 @@
 #include "jobQueue.h"
 #include <stdatomic.h>
 #include <stdbool.h>
+#include "performance.h"
 
 extern atomic_flag aflag;
 
@@ -37,5 +38,6 @@ void *executor(void *ptr) {
 		printf("Jobs Left Before Exit: %d\n", getJobCount()); 
 		runJob();
 	}
+	printstats();
 	
 }

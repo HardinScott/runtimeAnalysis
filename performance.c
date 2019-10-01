@@ -22,10 +22,9 @@ job_rec_struct records[10000];
 
 
 
-job_rec_struct newRecord(char* job_name, time_t arri_t, time_t exec_t, time_t end_t)
+job_rec_struct newRecord(time_t arri_t, time_t exec_t, time_t end_t)
 {
 	job_rec_struct record;
-	record.job_name = job_name;
 	record.arrival_time = arri_t;
 	record.exec_time = exec_t;
 	record.end_time = end_t;
