@@ -22,10 +22,13 @@ extern atomic_flag aflag;
 
 void *commandline(void *ptr) {
     while(1){
-	char holder[100];
-	fgets(holder, 100, stdin);
-	cmd_dispatch(holder);
-    }
+		char holder[100];
+		fgets(holder, 100, stdin);
+		if(cmd_dispatch(holder) == 2)
+		{
+			break ;
+		}
+   }
    printf("\nscheduler ended\n");
    
    exitQueue();//tell run to stop looking for job_queue

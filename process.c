@@ -11,11 +11,13 @@
  *
  */
 #include <stdio.h>
+#include <unistd.h>
 
 int main(int argc, char *argv[] )
 {
     int i = 1;
     printf("A process is running ...\n");
+	sleep(3);
     argc--;
 
     /* Print all the arguments passed from the commandline */

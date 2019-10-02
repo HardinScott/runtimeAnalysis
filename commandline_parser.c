@@ -33,10 +33,11 @@ int cmd_run(int nargs, char **args) {
         return EINVAL;
     }
 
-    char *job = args[1];
+    char *job = malloc(sizeof(char) * 254);
     int cpu_time = 0;
     int pri = 0;
-
+	
+	strcpy(job, args[1]);
     sscanf(args[2], "%d", &cpu_time);
     sscanf(args[3], "%d", &pri);
 
@@ -78,87 +79,35 @@ int cmd_priority(int nargs, char **args){
 }
 
 int cmd_quit(int nargs, char **args) {
-    exit(0);
+    return 2;
 }
 
 int cmd_test(int nargs, char **args){
     if(nargs != 7) {
-        printf("Usage: test <benchmark> <policy> <num_of_jobs> <priority_levels> <min_CPU_time> <max_CPU_time>\n");
+        printf("Usage: test <job name> <policy> <num_of_jobs> <priority_levels> <min_CPU_time> <max_CPU_time>\n");
         return EINVAL;
     }
-    printf("you submitted command:cmd_test\n" );
-/*
     if(strcmp(args[2], "fcfs") == 0 || strcmp(args[3], "FCFS") == 0)
-        scheduling_policy = FCFS;
+        setSchedType(1); 
     else if(strcmp(args[2], "sjf") == 0 || strcmp(args[3], "SJF") == 0)
-        scheduling_policy = SJF;
+	setSchedType(2);
     else if(strcmp(args[2], "priority") == 0 || strcmp(args[3], "Priority") == 0)
-        scheduling_policy = Priority;
-
-    int job_size;
-    sscanf(args[3], "%d", &job_size);
-    int pri_level;
-    sscanf(args[4], "%d", &pri_level);
-    int min_cpu_time;
-    sscanf(args[5], "%d", &min_cpu_time);
-    int max_cpu_time;
-    sscanf(args[6], "%d", &max_cpu_time);
+        setSchedType(3);
 
 
     time_t t;
-    time_t arr_timep;
-    srand(time(&t));
+    srand((unsigned) time(&t));
+    int priHold = rand() % 10;
+    int min = atoi(args[5]);
+    int max = atoi(args[6]);
+    int cpuHold = rand() % (min + max + 1);
+    for(int i = 0; i < atoi(args[3]); i++){
+	char *job = malloc(sizeof(char) * 254);
+        strcpy(job, args[1]);
 
-    FILE *workload_file;
-    workload_file = fopen("workload.txt", "r");
-    if(workload_file == 0){
-        printf("Could not open the workload file: workload.txt\n");
-        return -1;
+	int count = 0;
+	addJob(newJob(job, count, cpuHold, priHold));
     }
-    char *rate = malloc(sizeof(char) * 5);
-    size_t r_len = 0;
-
-    getline(&rate, &r_len, workload_file);
-
-    int sub_rate = 0;
-    sscanf(rate, "%d",&sub_rate);
-
-    FILE *file;
-    char *file_name;
-    file_name = malloc(sizeof(char) * strlen(args[2]));
-    strcpy(file_name, args[1]);
-
-    file = fopen(file_name, "r");
-    if(file == 0){
-        printf("Could not open the benchmark: %s\n", file_name);
-        return -1;
-    }
-
-    else{
-        for(int i = 0; i < job_size; i++){
-            JobData new_job = JobData_defult;
-            char* job_name = malloc(sizeof(char) * 10);
-            size_t len = 0;
-
-            getline(&job_name, &len, file);
-            if(i != job_size - 1)
-                job_name[strlen(job_name) - 1] = 0;
-            strcat(new_job.name, job_name);
-            new_job.priority = (rand() % (pri_level - 1)) + 1;
-            new_job.CPU_time = (rand() % (max_cpu_time - min_cpu_time)) + min_cpu_time;
-            arr_timep = time(NULL);
-            new_job.arrival_time = arr_timep;
-
-            InsertNewJob(new_job);
-            sleep(sub_rate);
-        }
-    }
-    fclose(file);
-
-    printf("Total number of jobs in the queue: %d\n", job_size);
-    printf("Scheduling Policy: %s\n", policy_name[scheduling_policy]);
-    ListJobQueue();
-*/
     return 0;
 }
 
@@ -184,7 +133,7 @@ int cmd_auto(int nargs, char **args){
     time_t arr_timep;
     size_t r_len = 0;
 
-    FILE *workload_file;
+    FILE *workload_fi;
     workload_file = fopen("workload.txt", "r");
     if(workload_file == 0){
         printf("Could not open the workload file: workload.txt\n");
@@ -378,10 +327,11 @@ positive integer	if the ASCII value of first unmatched character is greater than
 
     //Step 2: Call function through the cmd_table
             result = cmdtable[i].func(nargs, args);
-            return result;
+			return result;
+            
         }
     }
-
+	
     printf("%s: Command not found\n", args[0]);
     return EINVAL;
 }

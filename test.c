@@ -1,16 +1,14 @@
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "jobQueue.h"
-
-int getInput(){
-    int MAX_INPUT;
-    char str[MAX_INPUT];
-    fgets(str, MAX_INPUT, stdin);
-    printf("%s \n", str);
-    return 0;
-}
+#include <unistd.h>
 
 int main(){
-    getInput();
+    time_t x;
+    time_t y;
+    time(&x);
+    sleep(2);
+    time(&y);
+    printf("x %ld y %ld x+y %ld\n",x,y,x-y/2);
     return 0;
 }

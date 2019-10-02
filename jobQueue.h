@@ -65,6 +65,12 @@ int isEmpty(); //if job queue is empty returns 1 else 0
 
 int isFull(); //if job queue is full returns 1 else 0
 
+void incrementTotalCount(); //increments total jobs submitted by 1 
+
+void decrementTotalCount(); //decrements total jobs submitted by 1 
+
+int getTotalCount();//returns total count
+
 job_struct getElementAtPos(int pos); //returns element at pos
 
 void exitQueue(); //set exitQueueFlag to 1 don't wait for job_buf_not_empty in run
