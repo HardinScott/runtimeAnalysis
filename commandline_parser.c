@@ -87,6 +87,11 @@ int cmd_test(int nargs, char **args){
         printf("Usage: test <job name> <policy> <num_of_jobs> <priority_levels> <min_CPU_time> <max_CPU_time>\n");
         return EINVAL;
     }
+    int noJobs = atoi(args[3]);
+    if(noJobs >= JOB_BUF_SIZE){
+	printf("too many jobs, defaulting to max queue size\n");
+	noJobs = JOB_BUF_SIZE;
+    }
     if(strcmp(args[2], "fcfs") == 0 || strcmp(args[3], "FCFS") == 0)
         setSchedType(1); 
     else if(strcmp(args[2], "sjf") == 0 || strcmp(args[3], "SJF") == 0)
@@ -101,7 +106,7 @@ int cmd_test(int nargs, char **args){
     int min = atoi(args[5]);
     int max = atoi(args[6]);
     int cpuHold = rand() % (min + max + 1);
-    for(int i = 0; i < atoi(args[3]); i++){
+    for(int i = 0; i < noJobs; i++){
 	char *job = malloc(sizeof(char) * 254);
         strcpy(job, args[1]);
 

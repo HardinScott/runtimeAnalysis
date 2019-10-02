@@ -154,7 +154,7 @@ void addJob(job_struct job)//use when lock is not acquired
 static void addJobWithoutLock(job_struct job)//For when lock has been previously acquired
 {
 	//wait if job queue is full
-	while (isFullWithoutLock() == 1)
+	if(isFullWithoutLock() == 1)
 	{
 		pthread_cond_wait(&job_buf_not_full, &job_queue_lock);
     }
@@ -181,7 +181,7 @@ void runJob()
 	
     if(exitQueueFlag == 0) //if exitQueueFlag 1 don't wait for job_buf_not_empty
 	{
-		while (isEmptyWithoutLock() == 1) //if empty wait for job_buf_not_empty
+		if(isEmptyWithoutLock() == 1) //if empty wait for job_buf_not_empty
 		{
 			pthread_cond_wait(&job_buf_not_empty, &job_queue_lock);
 		}
@@ -232,17 +232,26 @@ void runJob()
 				time_t endT;
 				time(&endT);
 				printf("\nend time: %ld", endT);
-				job_rec_struct rec = newRecord(job_queue_buffer[buf_tail].arrival_time, execT, endT);
-				insertRecord(rec);
+				
+				incrementRecCount();
+				if(getFirstIsSet() == 0)
+				{
+					setFirstArri(job_queue_buffer[buf_tail].arrival_time);
+				}
+				setLastEnd(endT);
+				addCPU(endT - execT);
+				addTurn(endT - job_queue_buffer[buf_tail].arrival_time);
+				addWait(execT - job_queue_buffer[buf_tail].arrival_time);
 			}
+			/* Move buf_tail forward, this is a circular queue */
+			pthread_mutex_lock(&job_queue_lock);
+			free(job_queue_buffer[buf_tail].job_name);
+			free(job_queue_buffer[buf_tail].status);
+			incrementTailWithoutLock();
+			decrementJobCountWithoutLock();
+			pthread_cond_signal(&job_buf_not_full);
 		}
-		/* Move buf_tail forward, this is a circular queue */
-		pthread_mutex_lock(&job_queue_lock);
-		free(job_queue_buffer[buf_tail].job_name);
-		free(job_queue_buffer[buf_tail].status);
-		incrementTailWithoutLock();
-		decrementJobCountWithoutLock();
-		pthread_cond_signal(&job_buf_not_full);
+		
 		printf("\nout\n");
 		
 	}

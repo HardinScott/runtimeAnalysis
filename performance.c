@@ -5,90 +5,106 @@
 #define NUMBRECORDS
 
 /*prototypes*/
-static void incrementRecCount();
-static float calcTurnTime();
-static float calculateCPUTime();
-static float calcWaitTime();
-static float calcThroughput();
-
-
-
-
-struct job_rec_struct;
-
+static double calculateCPUTime();
+static double calcTurnTime();
+static double calcWaitTime();
+static long int calcThroughput();
+static void setFirstIsSet();
+static int firstIsSet = 0; //if firstArri is set then 1 else 0
 static int numRecords = 0;
 
-job_rec_struct records[10000];
+time_t cpuTotal, turnTotal, waitTotal, firstArri, lastEnd;
 
 
 
-job_rec_struct newRecord(time_t arri_t, time_t exec_t, time_t end_t)
+
+
+void incrementRecCount()
 {
-	job_rec_struct record;
-	record.arrival_time = arri_t;
-	record.exec_time = exec_t;
-	record.end_time = end_t;
-}
-
-void insertRecord(job_rec_struct record)
-{
-	records[numRecords] = record;
-	incrementRecCount();
-}
-
-static void incrementRecCount()
-{
+	
 	numRecords++;
 }
 
-static float calculateCPUTime()
+void addCPU(time_t result)
 {
-	long int total = 0;
-	float avg = 0.0;
-	
-	for( int i = 0; i < numRecords - 1; i++)
+	cpuTotal += result;
+}
+
+void addTurn(time_t  result)
+{
+	turnTotal += result;
+}
+
+void setFirstArri(time_t arri)
+{
+	firstArri = arri;
+
+	setFirstIsSet();
+
+}
+
+static void setFirstIsSet()
+{
+	firstIsSet = 1;
+}
+
+int getFirstIsSet()
+{
+	return firstIsSet;
+}
+
+void setLastEnd(time_t end)
+{
+	lastEnd = end;
+}
+
+void addWait(time_t  result)
+{
+	waitTotal += result;
+}
+
+static double calculateCPUTime()
+{
+	double avg = 0.0;
+	if(numRecords != 0)
 	{
-		 total = (total + (records[i].end_time - records[i].exec_time));
+		avg = cpuTotal / (double) numRecords;
 	}
-	avg = total / numRecords;
 	return avg;
 }
 
-static float calcTurnTime()
+static double calcTurnTime()
 {
-	long int total = 0;
-	float avg = 0.0;
-	
-	for( int i = 0; i < numRecords - 1; i++)
+	double avg = 0.0;
+	if(numRecords != 0)
 	{
-		 total = (total + ( records[i].end_time - records[i].arrival_time));
+		avg = turnTotal / (double) numRecords;
 	}
-	avg = total / numRecords;
 	return avg;
 }
 
-static float calcWaitTime()
+static double calcWaitTime()
 {
-	long int total = 0;
-	float avg = 0.0;
+	double avg = 0.0;
 	
-	for( int i = 0; i < numRecords - 1; i++)
+	if(numRecords != 0)
 	{
-		 total = (total + ( records[i].exec_time - records[i].arrival_time));
+		avg = cpuTotal / (double) numRecords;
 	}
-	avg = total / numRecords;
 	return avg;
 }
 
-static float calcThroughput()
+static long int calcThroughput()
 {
-	long int total = 0;
-	float avg = 0.0;
+	if(numRecords != 0)
+	{
+		return lastEnd - firstArri;
+	}
+	else
+	{
+		return 0;
+	}
 	
-	total = (total + ( records[numRecords - 1].end_time - records[0].arrival_time));
-
-	avg = total / numRecords;
-	return avg;
 }
 
 
@@ -96,11 +112,12 @@ static float calcThroughput()
 
 void printstats()
 {
+	
 	printf("\nTotal number of jobs submitted: %d\n", numRecords);
-	printf("\nAverage turnaround time: %f seconds\n", calculateCPUTime());
-	printf("\nAverage CPU time: %f seconds\n", calcTurnTime());
-	printf("\nAverage waiting time: %f seconds\n", calcWaitTime());
-	printf("\nThroughput: %f No.//seconds\n", calcThroughput());
+	printf("Average CPU time: %.2f seconds\n", calculateCPUTime());
+	printf("Average Turnaround time: %.2f seconds\n", calcTurnTime());
+	printf("Average Waiting time: %.2f seconds\n", calcWaitTime());
+	printf("Throughput: %ld No.//seconds\n", calcThroughput());
 }
 
 

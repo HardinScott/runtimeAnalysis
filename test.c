@@ -7,8 +7,9 @@ int main(){
     time_t x;
     time_t y;
     time(&x);
-    sleep(2);
+    sleep(1);
     time(&y);
-    printf("x %ld y %ld x+y %ld\n",x,y,x-y/2);
+    double holder = (y - x) /(double) 2;
+    printf("x %ld y %ld x+y %f x-y %ld\n",x,y,holder, x-y);
     return 0;
 }
