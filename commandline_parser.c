@@ -24,7 +24,7 @@
 #define E2BIG        2
 #define MAXJOB       100
 #define MAXMENUARGS  7
-
+//adds job to queue to run
 int cmd_run(int nargs, char **args) {
     time_t arr_timep;
 
@@ -50,18 +50,19 @@ int cmd_run(int nargs, char **args) {
     return 0; /* if succeed */
 
 }
-
+//lists all jobs
 int cmd_list(int nargs, char **args){
     listJobsInQueue();
     return 0;
 }
-
+//sorts and sets all jobs added to sort by when they were added
 int cmd_fcfs(int nargs, char **args){
     setSchedType(1);
     sortByPosition();
     printf("Now Sorting By FCFS, sorted %d items is in queue\n", getJobCount());
     return 0;
 }
+//sorts and sets all jobs added to sort by user defined cpu time
 
 int cmd_sjf(int nargs, char **args){
     setSchedType(2);
@@ -69,6 +70,7 @@ int cmd_sjf(int nargs, char **args){
     printf("Now Sorting By SJF, sorted %d items is in queue\n", getJobCount());
     return 0;
 }
+//sorts and sets all jobs added to sort by user defined priority
 
 int cmd_priority(int nargs, char **args){
     setSchedType(3);
@@ -77,11 +79,11 @@ int cmd_priority(int nargs, char **args){
     return 0;
 
 }
-
+//quits schedualer 
 int cmd_quit(int nargs, char **args) {
     return 2;
 }
-
+//tests performance
 int cmd_test(int nargs, char **args){
     if(nargs != 7) {
         printf("Usage: test <job name> <policy> <num_of_jobs> <priority_levels> <min_CPU_time> <max_CPU_time>\n");
@@ -117,93 +119,7 @@ int cmd_test(int nargs, char **args){
 }
 
 
-int cmd_auto(int nargs, char **args){
-    if(nargs != 4) {
-        printf("Usage: auto <list> <policy> <num_of_jobs>\n");
-        return EINVAL;
-    }
-    printf("you submitted command:cmd_auto\n" );
-/*
-    if(strcmp(args[2], "fcfs") == 0 || strcmp(args[3], "FCFS") == 0)
-        scheduling_policy = FCFS;
-    else if(strcmp(args[2], "sjf") == 0 || strcmp(args[3], "SJF") == 0)
-        scheduling_policy = SJF;
-    else if(strcmp(args[2], "priority") == 0 || strcmp(args[3], "Priority") == 0)
-        scheduling_policy = Priority;
-
-    int job_size;
-    sscanf(args[3], "%d", &job_size);
-
-    time_t t;
-    time_t arr_timep;
-    size_t r_len = 0;
-
-    FILE *workload_fi;
-    workload_file = fopen("workload.txt", "r");
-    if(workload_file == 0){
-        printf("Could not open the workload file: workload.txt\n");
-        return -1;
-    }
-
-    char *rate = malloc(sizeof(char) * 5);
-    getline(&rate, &r_len, workload_file);
-
-    int sub_rate = 0;
-    sscanf(rate, "%d",&sub_rate);
-
-    FILE *file;
-    char *file_name;
-    file_name = malloc(sizeof(char) * strlen(args[2]));
-    strcpy(file_name, args[1]);
-    size_t len = 0;
-    file = fopen(file_name, "r");
-
-    if(file == 0){
-        printf("Could not open the list: %s\n", file_name);
-        return -1;
-    }
-
-    else{
-        for(int i = 0; i < job_size; i++){
-            JobData new_job = JobData_defult;
-
-            char *job_name = malloc(sizeof(char) * 10);
-            char *job_time = malloc(sizeof(char) * 10);
-            char *job_prio = malloc(sizeof(char) * 10);
-            int job_t = 0;
-            int job_pri = 0;
-
-            getline(&job_name, &len, file);
-            if(i != job_size * 3 - 1)
-                job_name[strlen(job_name) - 1] = 0;
-            strcat(new_job.name, job_name);
-
-            getline(&job_time, &len, file);
-            if(i != job_size * 3 - 1)
-                job_name[strlen(job_name) - 1] = 0;
-            sscanf(job_time, "%d",&new_job.CPU_time);
-
-            getline(&job_prio, &len, file);
-            if(i != job_size * 3 - 1)
-                job_name[strlen(job_name) - 1] = 0;
-            sscanf(job_prio, "%d",&new_job.priority);
-
-            arr_timep = time(NULL);
-            new_job.arrival_time = arr_timep;
-
-            InsertNewJob(new_job);
-            sleep(sub_rate);
-        }
-    }
-    fclose(file);
-
-    printf("Total number of jobs in the queue: %d\n", job_size);
-    printf("Scheduling Policy: %s\n", policy_name[scheduling_policy]);
-    ListJobQueue();
-*/
-    return 0;
-}
-
+//shows commands
 void showmenu(const char *name, const char *x[])
 {
     int ct, half, i;
@@ -226,7 +142,7 @@ void showmenu(const char *name, const char *x[])
 
     printf("\n");
 }
-
+//strings to print in showmenu
 static const char *helpmenu[] = {
     "[run] <job> <time> <priority>",
     "[list] List all jobs in the queue",
@@ -234,13 +150,12 @@ static const char *helpmenu[] = {
     "[sjf]  Choose SJF as scheduling policy",
     "[pri]  Choose Priority as scheduling policy",
     "[test] Automatically execute all jobs in benchmark",
-    "[auto] Automatically execute all jobs in list",
     "[quit] Exit CSUbatch",
     "[help] Print help menu",
     /* Please add more menu options below */
     NULL
 };
-
+//shows help menu
 int cmd_helpmenu(int n, char **a)
 {
     (void)n;
@@ -269,7 +184,6 @@ static struct {
     { "sjf\n",    cmd_sjf },
     { "pri\n",    cmd_priority },
     { "test",     cmd_test},
-    {"auto",        cmd_auto},
     { "q\n",    cmd_quit },
     { "quit\n",    cmd_quit },
     /* Please add more operations below. */

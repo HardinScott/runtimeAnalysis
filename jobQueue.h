@@ -39,19 +39,19 @@ void initMutex(); //initialize mutex lock and conditions
 
 /*Job Create,Add and Run functions*/
 job_struct newJob(char* job_name, int arrival_position, int execution_time, int priority);
-
+//adds job to queue
 void addJob(job_struct job); //adds job to job queue
-
+//runs job
 void runJob(); //run job from tail of job queue
-
+//sees if there is anything in queue 1 if there is
 void jobQueueNotEmpty();
-
+//sorts by fcfs
 void sortByPosition();
-
+//sorts by sjf
 void sortByExecTime();
-
+//sorts by pri
 void sortByPriority();
-
+//lists all job in queue
 void listJobsInQueue();
 
 /*job count functions*/
