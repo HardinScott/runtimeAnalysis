@@ -17,9 +17,9 @@
 #include <stdatomic.h>
 #include "commandline_parser.h"
 
-//is done flag
+
 extern atomic_flag aflag;
-//to run in pthread in csubatch main function
+
 void *commandline(void *ptr) {
     while(1){
 		char holder[100];
